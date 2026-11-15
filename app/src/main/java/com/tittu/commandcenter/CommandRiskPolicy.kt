@@ -38,7 +38,7 @@ object CommandRiskPolicy {
 
         // Shell operators, substitutions and redirections always need review.
         if (Regex("[;&|<>$]").containsMatchIn(normalized) ||
-            normalized.contains(String(charArrayOf(96)))) {
+            normalized.contains('`')) {
             return CommandRisk.REQUIRES_APPROVAL
         }
 
