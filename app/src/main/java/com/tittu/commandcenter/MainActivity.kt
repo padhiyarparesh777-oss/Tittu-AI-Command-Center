@@ -188,6 +188,13 @@ private fun CommandCenterApp(onRequestTermuxPermission: () -> Unit) {
                                 output = "Termux is not installed."
                             } else if (!TermuxBridge.hasPermission(context)) {
                                 onRequestTermuxPermission()
+                            } else if (CommandRiskPolicy.classify(command) == CommandRisk.SAFE_READ_ONLY) {
+                                val result = TermuxBridge.runShellCommand(context, command, useUbuntu)
+                                result.onSuccess {
+                                    output = "Read-only command dispatched. Check the Termux session/notification for output."
+                                }.onFailure {
+                                    output = "Command failed to start: ${it.message}"
+                                }
                             } else {
                                 pendingCommand = command
                             }
