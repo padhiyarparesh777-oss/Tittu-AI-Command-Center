@@ -91,8 +91,13 @@ private fun CommandCenterApp(onRequestTermuxPermission: () -> Unit) {
     val client = remember { OpenCodeClient() }
 
     LaunchedEffect(Unit) {
+        if (TermuxBridge.isTermuxInstalled(context) && TermuxBridge.hasPermission(context)) {
+            status = "Starting local services…"
+            TermuxBridge.startOpenCode(context, useUbuntu)
+            kotlinx.coroutines.delay(1800)
+        }
         client.health().onSuccess { status = "OpenCode online" }
-            .onFailure { status = "OpenCode offline" }
+            .onFailure { status = "OpenCode offline · tap Start server in Settings" }
     }
 
     if (pendingCommand != null) {
