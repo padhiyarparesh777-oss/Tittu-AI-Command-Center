@@ -46,6 +46,7 @@ object TermuxBridge {
             putExtra("com.termux.RUN_COMMAND_BACKGROUND", background)
         }
         context.startService(intent)
+        Unit
     }
 
     fun startOpenCode(context: Context, useUbuntu: Boolean): Result<Unit> =
