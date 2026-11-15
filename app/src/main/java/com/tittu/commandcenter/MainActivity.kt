@@ -283,14 +283,14 @@ private fun CommandCenterApp(onRequestTermuxPermission: () -> Unit) {
                         Button(onClick = {
                             if (!TermuxBridge.isTermuxInstalled(context)) output = "Install Termux first."
                             else if (!TermuxBridge.hasPermission(context)) onRequestTermuxPermission()
-                            else TermuxBridge.setupUbuntuDesktop(context).onSuccess { output = "Ubuntu desktop setup started in background." }.onFailure { output = "Setup could not start: ${it.message}" }
+                            else TermuxBridge.setupUbuntuDesktop(context, useUbuntu).onSuccess { output = "Ubuntu desktop setup started in background." }.onFailure { output = "Setup could not start: ${it.message}" }
                         }, modifier = Modifier.fillMaxWidth()) { Text("1 · Install XFCE + VNC") }
                         Button(onClick = {
                             if (!TermuxBridge.hasPermission(context)) onRequestTermuxPermission()
-                            else TermuxBridge.startUbuntuDesktop(context).onSuccess { output = "VNC start requested. Connect VNC Viewer to 127.0.0.1:5901." }.onFailure { output = "Could not start desktop: ${it.message}" }
+                            else TermuxBridge.startUbuntuDesktop(context, useUbuntu).onSuccess { output = "VNC start requested. Connect VNC Viewer to 127.0.0.1:5901." }.onFailure { output = "Could not start desktop: ${it.message}" }
                         }, modifier = Modifier.fillMaxWidth()) { Text("2 · Start Linux desktop") }
                         OutlinedButton(onClick = {
-                            TermuxBridge.stopUbuntuDesktop(context).onSuccess { output = "VNC stop requested." }.onFailure { output = "Could not stop desktop: ${it.message}" }
+                            TermuxBridge.stopUbuntuDesktop(context, useUbuntu).onSuccess { output = "VNC stop requested." }.onFailure { output = "Could not stop desktop: ${it.message}" }
                         }, modifier = Modifier.fillMaxWidth()) { Text("Stop desktop") }
                     }
                     GlassPanel(Modifier.fillMaxWidth()) {
@@ -298,7 +298,7 @@ private fun CommandCenterApp(onRequestTermuxPermission: () -> Unit) {
                         Text("Git, curl, wget, editors, compiler, Python, Node.js and SSH server.", color = Muted, style = MaterialTheme.typography.bodySmall)
                         Button(onClick = {
                             if (!TermuxBridge.hasPermission(context)) onRequestTermuxPermission()
-                            else TermuxBridge.installDeveloperTools(context).onSuccess { output = "Developer tools installation started in Ubuntu background." }.onFailure { output = "Could not start install: ${it.message}" }
+                            else TermuxBridge.installDeveloperTools(context, useUbuntu).onSuccess { output = "Developer tools installation started in Ubuntu background." }.onFailure { output = "Could not start install: ${it.message}" }
                         }, modifier = Modifier.fillMaxWidth()) { Text("Install Linux developer tools") }
                     }
                     GlassPanel(Modifier.fillMaxWidth()) {
