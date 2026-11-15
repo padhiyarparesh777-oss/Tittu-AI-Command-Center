@@ -47,10 +47,22 @@ object TermuxBridge {
         Unit
     }
 
+    /**
+     * Install OpenCode on first launch when missing, then start its local API.
+     * The installer is the official OpenCode install script; logs are kept in
+     * ~/.opencode-server.log so setup failures can be inspected in Termux.
+     */
     fun startOpenCode(context: Context, useUbuntu: Boolean): Result<Unit> =
         runShellCommand(
             context,
-            "if ! pgrep -f '[o]pencode serve.*4096' >/dev/null 2>&1; then nohup opencode serve --hostname 127.0.0.1 --port 4096 > \"\$HOME/.opencode-server.log\" 2>&1 < /dev/null & fi",
+            "export PATH=\"\$HOME/.opencode/bin:\$HOME/.local/bin:\$PATH\"; " +
+                "if ! command -v opencode >/dev/null 2>&1; then " +
+                "command -v curl >/dev/null 2>&1 || { echo 'curl is required to install OpenCode'; exit 127; }; " +
+                "curl -fsSL https://opencode.ai/install | bash || exit 1; " +
+                "export PATH=\"\$HOME/.opencode/bin:\$HOME/.local/bin:\$PATH\"; fi; " +
+                "command -v opencode || exit 127; " +
+                "if ! pgrep -f '[o]pencode serve.*4096' >/dev/null 2>&1; then " +
+                "nohup opencode serve --hostname 0.0.0.0 --port 4096 > \"\$HOME/.opencode-server.log\" 2>&1 < /dev/null & fi",
             useUbuntu,
             background = true
         )
