@@ -55,7 +55,7 @@ object TermuxBridge {
             background = true
         )
 
-    fun setupUbuntuDesktop(context: Context): Result<Unit> =
+    fun setupUbuntuDesktop(context: Context, useUbuntu: Boolean): Result<Unit> =
         runShellCommand(
             context,
             "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y xfce4 xfce4-terminal tigervnc-standalone-server dbus-x11",
@@ -63,7 +63,7 @@ object TermuxBridge {
             background = true
         )
 
-    fun startUbuntuDesktop(context: Context): Result<Unit> =
+    fun startUbuntuDesktop(context: Context, useUbuntu: Boolean): Result<Unit> =
         runShellCommand(
             context,
             "mkdir -p \$HOME/.vnc && printf '#!/bin/sh\\nstartxfce4 &\\n' > \$HOME/.vnc/xstartup && chmod +x \$HOME/.vnc/xstartup && (vncserver -kill :1 >/dev/null 2>&1 || true) && vncserver :1 -localhost yes -geometry 1280x800 -depth 24",
@@ -71,10 +71,10 @@ object TermuxBridge {
             background = true
         )
 
-    fun stopUbuntuDesktop(context: Context): Result<Unit> =
+    fun stopUbuntuDesktop(context: Context, useUbuntu: Boolean): Result<Unit> =
         runShellCommand(context, "vncserver -kill :1", useUbuntu, background = true)
 
-    fun installDeveloperTools(context: Context): Result<Unit> =
+    fun installDeveloperTools(context: Context, useUbuntu: Boolean): Result<Unit> =
         runShellCommand(
             context,
             "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y git curl wget nano vim build-essential python3 python3-pip nodejs npm openssh-server",
