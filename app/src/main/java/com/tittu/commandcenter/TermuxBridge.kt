@@ -34,9 +34,7 @@ object TermuxBridge {
 
         val actualCommand = if (useUbuntu) {
             "proot-distro login ubuntu -- bash -lc " + shellQuote(command)
-        } else {
-            command
-        }
+        } else command
 
         val intent = Intent(RUN_COMMAND_ACTION).apply {
             setClassName(TERMUX_PACKAGE, RUN_COMMAND_SERVICE)
@@ -52,7 +50,34 @@ object TermuxBridge {
     fun startOpenCode(context: Context, useUbuntu: Boolean): Result<Unit> =
         runShellCommand(
             context,
-            "if ! pgrep -f 'opencode serve.*4096' >/dev/null 2>&1; then nohup opencode serve --hostname 127.0.0.1 --port 4096 > \"\$HOME/.opencode-server.log\" 2>&1 < /dev/null & fi",
+            "if ! pgrep -f '[o]pencode serve.*4096' >/dev/null 2>&1; then nohup opencode serve --hostname 127.0.0.1 --port 4096 > \"\$HOME/.opencode-server.log\" 2>&1 < /dev/null & fi",
+            useUbuntu,
+            background = true
+        )
+
+    fun setupUbuntuDesktop(context: Context): Result<Unit> =
+        runShellCommand(
+            context,
+            "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y xfce4 xfce4-terminal tigervnc-standalone-server dbus-x11",
+            useUbuntu,
+            background = true
+        )
+
+    fun startUbuntuDesktop(context: Context): Result<Unit> =
+        runShellCommand(
+            context,
+            "mkdir -p \$HOME/.vnc && printf '#!/bin/sh\\nstartxfce4 &\\n' > \$HOME/.vnc/xstartup && chmod +x \$HOME/.vnc/xstartup && (vncserver -kill :1 >/dev/null 2>&1 || true) && vncserver :1 -localhost yes -geometry 1280x800 -depth 24",
+            useUbuntu,
+            background = true
+        )
+
+    fun stopUbuntuDesktop(context: Context): Result<Unit> =
+        runShellCommand(context, "vncserver -kill :1", useUbuntu, background = true)
+
+    fun installDeveloperTools(context: Context): Result<Unit> =
+        runShellCommand(
+            context,
+            "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y git curl wget nano vim build-essential python3 python3-pip nodejs npm openssh-server",
             useUbuntu,
             background = true
         )
