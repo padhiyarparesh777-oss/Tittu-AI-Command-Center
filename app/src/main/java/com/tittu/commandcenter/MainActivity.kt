@@ -99,14 +99,13 @@ private fun CommandCenterApp(onRequestTermuxPermission: () -> Unit) {
             status = "Installing / starting OpenCode…"
             TermuxBridge.startOpenCode(context, useUbuntu)
             var connected = false
-            repeat(12) {
+            for (attempt in 1..12) {
                 kotlinx.coroutines.delay(1500)
                 client.health().onSuccess {
                     status = "OpenCode online"
                     connected = true
-                    return@repeat
                 }
-                if (connected) return@repeat
+                if (connected) break
             }
             if (!connected) status = "OpenCode offline · check server log"
         }
