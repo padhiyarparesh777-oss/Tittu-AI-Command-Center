@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
 }
 
 private enum class AppTab(val title: String) {
-    CHAT("Chat"), TERMINAL("Terminal"), PROJECTS("Projects"), SETTINGS("Settings")
+    CHAT("Chat"), LINUX("Linux"), TERMINAL("Terminal"), PROJECTS("Projects"), SETTINGS("Settings")
 }
 
 private data class ChatLine(val text: String, val fromUser: Boolean)
@@ -145,6 +145,7 @@ private fun CommandCenterApp(onRequestTermuxPermission: () -> Unit) {
                 AppTab.entries.forEach { tab ->
                     val icon = when (tab) {
                         AppTab.CHAT -> Icons.Default.ChatBubbleOutline
+                        AppTab.LINUX -> Icons.Default.Terminal
                         AppTab.TERMINAL -> Icons.Default.Terminal
                         AppTab.PROJECTS -> Icons.Default.FolderOpen
                         AppTab.SETTINGS -> Icons.Default.Settings
@@ -268,6 +269,40 @@ private fun CommandCenterApp(onRequestTermuxPermission: () -> Unit) {
                             }
                         }, enabled = !busy) { Text("＋ New session", color = Lavender) }
                     }
+                }
+                AppTab.LINUX -> {
+                    SectionHeading("Ubuntu Linux", "Desktop environment and developer tools, controlled from this app.")
+                    GlassPanel(Modifier.fillMaxWidth()) {
+                        Text("Ubuntu desktop", color = Lavender, fontWeight = FontWeight.SemiBold)
+                        Text("Install XFCE and VNC inside Ubuntu. First setup downloads packages and may take time.", color = Muted, style = MaterialTheme.typography.bodySmall)
+                        Button(onClick = {
+                            if (!TermuxBridge.isTermuxInstalled(context)) output = "Install Termux first."
+                            else if (!TermuxBridge.hasPermission(context)) onRequestTermuxPermission()
+                            else TermuxBridge.setupUbuntuDesktop(context).onSuccess { output = "Ubuntu desktop setup started in background." }.onFailure { output = "Setup could not start: ${it.message}" }
+                        }, modifier = Modifier.fillMaxWidth()) { Text("1 · Install XFCE + VNC") }
+                        Button(onClick = {
+                            if (!TermuxBridge.hasPermission(context)) onRequestTermuxPermission()
+                            else TermuxBridge.startUbuntuDesktop(context).onSuccess { output = "VNC start requested. Connect VNC Viewer to 127.0.0.1:5901." }.onFailure { output = "Could not start desktop: ${it.message}" }
+                        }, modifier = Modifier.fillMaxWidth()) { Text("2 · Start Linux desktop") }
+                        OutlinedButton(onClick = {
+                            TermuxBridge.stopUbuntuDesktop(context).onSuccess { output = "VNC stop requested." }.onFailure { output = "Could not stop desktop: ${it.message}" }
+                        }, modifier = Modifier.fillMaxWidth()) { Text("Stop desktop") }
+                    }
+                    GlassPanel(Modifier.fillMaxWidth()) {
+                        Text("Developer environment", color = Lavender, fontWeight = FontWeight.SemiBold)
+                        Text("Git, curl, wget, editors, compiler, Python, Node.js and SSH server.", color = Muted, style = MaterialTheme.typography.bodySmall)
+                        Button(onClick = {
+                            if (!TermuxBridge.hasPermission(context)) onRequestTermuxPermission()
+                            else TermuxBridge.installDeveloperTools(context).onSuccess { output = "Developer tools installation started in Ubuntu background." }.onFailure { output = "Could not start install: ${it.message}" }
+                        }, modifier = Modifier.fillMaxWidth()) { Text("Install Linux developer tools") }
+                    }
+                    GlassPanel(Modifier.fillMaxWidth()) {
+                        Text("Connection details", color = Lavender, fontWeight = FontWeight.SemiBold)
+                        Text("VNC: 127.0.0.1:5901 · Display :1", color = Muted)
+                        Text("OpenCode API: 127.0.0.1:4096", color = Muted)
+                        Text("For graphics, install a VNC Viewer app and connect to localhost:5901. Run vncpasswd once inside Ubuntu to set the desktop password.", color = Muted, style = MaterialTheme.typography.bodySmall)
+                    }
+                    GlassPanel(Modifier.fillMaxWidth()) { Text("Activity", color = Lavender, fontWeight = FontWeight.SemiBold); Text(output, color = Muted) }
                 }
                 AppTab.TERMINAL -> {
                     SectionHeading("Terminal", "Run commands in your Termux or Ubuntu environment.")
